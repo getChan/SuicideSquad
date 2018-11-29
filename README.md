@@ -1,2 +1,2 @@
-# SuicideSquard
+# SuicideSquad
 Capstone design project
