@@ -30,6 +30,6 @@ def VidToFrame(load_path, save_path):
 
 
 if __name__ == '__main__':
-    load_path = '..\\data\\raw\\감사(1)_Trim.mp4'
-    save_path = "..\\data\\frames\\thank%d.jpg"
+    load_path = '..\\data\\raw\\hi.mp4'
+    save_path = "..\\data\\frames\\hi\\hi%d.jpg"
     VidToFrame(load_path, save_path)
