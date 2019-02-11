@@ -1,0 +1,6 @@
+## ignore file
+
+data/
+src/.ipynb_checkpoints
+src/__pycache__
+src/.vscode
