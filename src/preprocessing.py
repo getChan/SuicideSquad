@@ -1,8 +1,8 @@
-
+#%%
 import cv2
 import numpy as np
 import os
-
+#%%
 def VidToFrame(load_path):
     frames = list()
     try:
@@ -20,7 +20,8 @@ def VidToFrame(load_path):
             upper_skin = np.array([255, 173, 127])
             
             mask = cv2.inRange(hsv, lower_skin, upper_skin)
-            image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+            mask = cv2.threshold(mask, cv2.THRESH_BINARY)
+            image = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
 
             width = 720
             height = 480
