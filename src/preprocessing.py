@@ -21,7 +21,7 @@ def VidToFrame(load_path):
             
             mask = cv2.inRange(hsv, lower_skin, upper_skin)
             mask = cv2.threshold(mask, cv2.THRESH_BINARY)
-            image = cv2.cvtColor(image,cv2.COLOR_RGB2GRAY)
+            image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
 
             width = 720
             height = 480
@@ -30,7 +30,6 @@ def VidToFrame(load_path):
 
             mask = mask - img
             
-
             if cv2.waitKey(10) == 27:                     # exit if Escape is hit
                 break
             frames.append(mask)
