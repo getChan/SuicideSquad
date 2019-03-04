@@ -1,96 +1,183 @@
-#%%
 import tensorflow as tf
+import numpy as np
+from tqdm import tqdm
+import time
+import preprocessing as pre
+import tensorflow.contrib.layers as layers
 
-#%%
-#동영상 분류 클래스 갯수
-NUM_CLASSES = 6
 
-#%%
-#이미지의 레이어 갯수와 이미지를 잘라낼 사이즈
-#우리는 흑백이미지 이므로 CHANNEL이 하나
-CROP_SIZE = 116
-CHANNEL = 1
+data, label = pre.getDataFrame('F:raw/')
+data = np.expand_dims(data, -1)
+print(data.shape)
 
-#%%
-#비디오 클립당 프레임의 갯수
-NUM_FRAMES_PER_CLIP = 60
+X_train = data[:30]
+y_train = label[:30]
+X_test = data[30:]
+y_test = label[30:]
 
-#%%
-#conv3d 정의
-#tf.nn.bias_add = tensorflow/python/ops/nn_ops.py에 정의되어 있으며 value에 bias를 추가한다.
-#tf.add의 특별한 케이스로 바이어스가 1차원으로 제한된다. 
-#브로드캐스팅이 지원된다. 그래서 value는 아마도 차원들의 숫자를 가지고 있다.
-#tf.add와는 같지 않게, bias의 타입은 value의 타입과 다를수 있다.
-#value = 텐서의 타입 float, double, int 64, int32, uint8, int16, int8, complex64 혹은 complex128로 되어있음
-#bias = 값의 마지막 차원가 일치하는 크기의 1차원 텐서
+class Model(object):
+    def __init__(self,
+            num_class = 5,
+            keep_prob = 0.6,
+            batch_size = 10,
+            epoch=1,
+            lr = 1e-4):
+        self.IMG_WIDTH = 1920
+        self.IMG_HEIGHT = 1080
+        
+        self.graph = tf.Graph()
+        self.num_class = num_class
+        self.epoch = epoch
+        self.CLIP_LENGTH = 30
+        self.keep_prob = keep_prob
+        self.batch_size = batch_size
+        
+        self.n_step_epoch=int(30/batch_size)
+        with self.graph.as_default():
+            # [batch, in_depth, in_height, in_width, in_channels]
+            self.inputs = tf.placeholder(tf.float32, [None, self.CLIP_LENGTH, self.IMG_HEIGHT, self.IMG_WIDTH, 1])
+            self.labels = tf.placeholder(tf.int64, [batch_size, 5])
 
-#tf.nn.conv3d = 주어진 5차원의 입력값과 필터 텐서를 3차원 컨볼루션으로 계산한다.
-#input = 텐서, 반드시 half, bfloat16, float32 타입중 하나여야 하고, 형태는 [배치, 내부 깊이, 내부 높이, 내부 넓이, 내부 채널]로 구성됨 
-#filter = 텐서, 반드시 같은 타입의 input을 가져야함, 형태는 [필터 깊이ㅣ, 필터 높이, 필터 넓이,내부 채널, 외부 채널]로 이루어짐. 내부 채널은 반드시 입력값과 필터의 사이에서 매치되어야 한다.
-#stride = 길이가 5이상을 가진 ints의 리스트, 길이가 5인 1차원 텐서. strides[0]과 strides[4]는 무조건 1이어야 한다. input의 각 차원에 대한 슬라이딩 윈도우의 스트라이드
-#padding = 모서리 부분 연산할때 어떻게 할지 SAME하고 VALID가 있음
-#data_format = 데이터 포맷
-#dilations = ints의 옵션 리스트
-def conv3d(name, l_input, w, b):
-    return tf.nn.bias_add(tf.nn.conv3d(l_input, w, stride=[1, 1, 1, 1, 1], padding='SAME'), b)
+            self.initializer = layers.xavier_initializer()
+            self.global_step = tf.Variable(0, trainable = False, name = "global_step")
+            self.lr = lr
+            tf.add_to_collection(tf.GraphKeys.GLOBAL_STEP, self.global_step)
+         
+    def conv3d(self, inputs, shape, name, w_name, b_name):
+        with self.graph.as_default():
+            with tf.variable_scope('var_name') as var_scope:
+                W = tf.get_variable(name = w_name, shape = shape, initializer = self.initializer, dtype = tf.float32)
+                b = tf.get_variable(name = b_name, shape = shape[-1], initializer = tf.zeros_initializer(), dtype = tf.float32)
+                tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
+                tf.add_to_collection(tf.GraphKeys.BIASES, b)
+            return tf.nn.relu(tf.nn.bias_add(tf.nn.conv3d(inputs, W, strides = [1, 1, 1, 1, 1], padding = "SAME"), b))
+        
+    def fc(self, inputs, shape, name,w_name,b_name,activation = True):
+        with self.graph.as_default():
+            with tf.variable_scope('var_name') as var_scope:
+                W = tf.get_variable(name = w_name, shape = shape, initializer = self.initializer, dtype = tf.float32)
+                b = tf.get_variable(name = b_name, shape = shape[-1], initializer = tf.zeros_initializer(), dtype = tf.float32)
+                tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
+                tf.add_to_collection(tf.GraphKeys.BIASES, b)
 
-#%%
-#max pooling = 입력값에 대해서 3D maxpooling을 수행함
-#max pooling 이란 pixel 에서 stride를 정의해서 그 사이즈로 줄일때 최댓값을 뽑아내는 방식
-#input = 텐서가 들어감, 반드시 half, bfloat16, float32 타입중 하나여야 하고, 형태는 [배치, 깊이, 열, 행, 채널]로 구성됨
-#ksize = 길이가 5이상을 가진 ints의 리스트, 길이가 5인 1차원 텐서. ksize[0]과 ksize[4]는 무조건 1이어야 한다. 입력 텐서의 각 차원에 대한 창 크기. 
-#stride = 길이가 5이상을 가진 ints의 리스트, 길이가 5인 1차원 텐서. strides[0]과 strides[4]는 무조건 1이어야 한다. input의 각 차원에 대한 슬라이딩 윈도우의 스트라이드
-#padding = 모서리 부분 연산할때 어떻게 할지 SAME하고 VALID가 있음
-#name = 오퍼레이션을 위한 이름
-def max_pool(name, l_input, k):
-    return tf.nn.max_pool3d(l_input, ksize=[1, k, 2, 2, 1], strides=[1, k, 2, 2, 1], padding='SAME', name=name)
+            if activation:
+                return tf.nn.relu(tf.nn.bias_add(tf.matmul(inputs, W), b))
+            else:
+                return tf.nn.bias_add(tf.matmul(inputs, W), b)
+            
+    def parseNet(self, net, netstruct, istraining = True):
+        for key in netstruct:
+            if key[0] == "conv":
+                net = self.conv3d(net, key[2], key[1],key[3], key[4])
+            elif key[0] == "fc":
+                net = self.fc(net, key[2], key[1], key[3], key[4],activation = key[-1])
+            elif key[0] == "maxpool":
+                net = tf.nn.max_pool3d(net, ksize = key[2], strides = key[2], padding = "SAME", name = key[1])
+            elif key[0] == "dropout" and istraining:
+                net = tf.nn.dropout(net, key[2], name = key[1])
+            elif key[0] == "reshape":
+                net = tf.reshape(net, key[-1])
+            elif key[0] == "softmax":
+                net = tf.nn.softmax(net)
+            elif key[0] == "transpose":
+                net = tf.transpose(net, perm=key[-1])
+        return net
 
-#%%
-#모델 구현
-def inference_c3d(_X, _dropout, batch_size, _weights, _biases):
-    # Convolution Layer
-    conv1 = conv3d('conv1', _X, _weights['wc1'], _biases['bc1'])
-    conv1 = tf.nn.relu(conv1, 'relu1')
-    pool1 = max_pool('pool1', conv1, k=1)
+    def test(self, modelpath, data, label):
+        with self.graph.as_default():
+            
+#             [filter_depth, filter_height, filter_width, in_channels, out_channels]
+            c3d_net = [
+                ["conv", "conv1", [3, 3, 3, 1, 64], 'wc1', 'bc1'],
+#                 [batch, depth, rows, cols, channels]
+                ["maxpool", "pool1", [1, 1, 2, 2, 1]],
+                ["conv", "conv2", [3, 3, 3, 64, 128], 'wc2', 'bc2'],
+                ["maxpool", "pool2", [1, 2, 2, 2, 1]],
+                ["conv", "conv3a", [3, 3, 3, 128, 256], 'wc3a', 'bc3a'],
+                ["conv", "conv3b", [3, 3, 3, 256, 256], 'wc3b', 'bc3b'],
+                ["maxpool", "pool3", [1, 2, 2, 2, 1]],
+                ["conv", "conv4a", [3, 3, 3, 256, 512], 'wc4a', 'bc4a'],
+                ["conv", "conv4b", [3, 3, 3, 512, 512], 'wc4b', 'bc4b'],
+                ["maxpool", "pool4", [1, 2, 2, 2, 1]],
+#                 ["conv", "conv5a", [3, 3, 3, 512, 512], 'wc5a', 'bc5a'],
+#                 ["conv", "conv5b", [3, 3, 3, 512, 512], 'wc5b', 'bc5b'],
+#                 ["maxpool", "pool5", [1, 2, 2, 2, 1]],
+#                 ["transpose", [0, 1, 4, 2, 3]],  #only use it if you restore the sports1m_finetuning_ucf101.model, otherwise uncomment it,(e.g use conv3d_deepnetA_sport1m_iter_1900000_TF.model)
+                ["reshape", [-1, 8192]],
+                ["fc", "fc1", [8192, 4096], 'wd1', 'bd1', True],
+                ["dropout", "dropout1", self.keep_prob],
+                ["fc", "fc2", [4096, 4096],'wd2','bd2', True],
+                ["dropout", "dropout2", self.keep_prob],
+                ["fc", "fc3", [4096, self.num_class],'wout','bout',False],
+            ]
 
-    # Convolution Layer
-    conv2 = conv3d('conv2', pool1, _weights['wc2'], _biases['bc2'])
-    conv2 = tf.nn.relu(conv2, 'relu2')
-    pool2 = max_pool('pool2', conv2, k=2)
+            # print(tf.trainable_variables())
+            # print(var_list)
+            # print(tf.get_collection(tf.GraphKeys.WEIGHTS))
 
-    # Convolution Layer
-    conv3 = conv3d('conv3a', pool2, _weights['wc3a'], _biases['bc3a'])
-    conv3 = tf.nn.relu(conv3, 'relu3a')
-    conv3 = conv3d('conv3b', conv3, _weights['wc3b'], _biases['bc3b'])
-    conv3 = tf.nn.relu(conv3, 'relu3b')
-    pool3 = max_pool('pool3', conv3, k=2)
+            # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction = 0.5)
 
-    # Convolution Layer
-    conv4 = conv3d('conv4a', pool3, _weights['wc4a'], _biases['bc4a'])
-    conv4 = tf.nn.relu(conv4, 'relu4a')
-    conv4 = conv3d('conv4b', conv4, _weights['wc4b'], _biases['bc4b'])
-    conv4 = tf.nn.relu(conv4, 'relu4b')
-    pool4 = max_pool('pool4', conv4, k=2)
+            with tf.Session() as sess:
+                logits = self.parseNet(self.inputs, c3d_net)
+                softmax_logits = tf.nn.softmax(logits)
+                # int_label = tf.one_hot(self.labels, self.num_class)
+                int_label = self.labels  # [bs,101]-->[bs*4 or 8 or 16,101]
+                # int_label=tf.concat(
+                #     [int_label,int_label,int_label,int_label,],axis=0)
 
-    # Convolution Layer
-    conv5 = conv3d('conv5a', pool4, _weights['wc5a'], _biases['bc5a'])
-    conv5 = tf.nn.relu(conv5, 'relu5a')
-    conv5 = conv3d('conv5b', conv5, _weights['wc5b'], _biases['bc5b'])
-    conv5 = tf.nn.relu(conv5, 'relu5b')
-    pool5 = max_pool('pool5', conv5, k=2)
+                int_label=tf.cast(int_label,dtype=tf.int64)
+#                 task_loss = tf.reduce_sum(
+#                     tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=int_label))
+                task_loss = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits_v2(logits = logits, labels = int_label))
+                # task_loss = -tf.reduce_sum(int_label*tf.log(logits))
+                acc = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(softmax_logits, axis=-1), int_label), tf.float32))
+                right_count = tf.reduce_sum(tf.cast(tf.equal(tf.argmax(softmax_logits, axis=1), int_label), tf.int32))
+    
+                reg_loss = layers.apply_regularization(layers.l2_regularizer(5e-4),
+                                                       tf.get_collection(tf.GraphKeys.WEIGHTS))
+                total_loss = task_loss + reg_loss
+                # train_var_list = [v for v in tf.trainable_variables() if v.name.find("conv") == -1]
+                train_op = tf.train.GradientDescentOptimizer(self.lr).minimize(
+                    total_loss, global_step=self.global_step)
+                # train_op = tf.train.MomentumOptimizer(self.lr,0.9).minimize(
+                #     total_loss, global_step = self.global_step,var_list=train_var_list)
+    
+    
+                total_para = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+                print('total_para:', total_para)  # all CDC9 :28613120  #pool5 27655936c
 
-    # Fully connected layer
-    pool5 = tf.transpose(pool5, perm=[0,1,4,2,3])
-    dense1 = tf.reshape(pool5, [batch_size, _weights['wd1'].get_shape().as_list()[0]]) # Reshape conv3 output to fit dense layer input
-    dense1 = tf.matmul(dense1, _weights['wd1']) + _biases['bd1']
+                # train clip:762960
+                # test  clip:302640
+                init = tf.global_variables_initializer()
+                # var_list = [v for v in tf.trainable_variables() if v.name.find("conv") != -1]  # 初始化只加载卷积层参数
+                # print(var_list)
+                # saver = tf.train.Saver(tf.global_variables())
+                sess.run(init)
+                saver = tf.train.Saver(tf.trainable_variables())
+                # saver.restore(sess, tf.train.latest_checkpoint(modelpath))
+                # saver.restore(sess, modelpath + "sports1m_finetuning_ucf101.model")
+                # print("Model Loading Done!")
+                step = 0
+                print_freq = 2
+                next_start_pos = 0
+                for one_epoch in range(1):
+                    epostarttime = time.time()
+                    starttime = time.time()
+                    total_v = 0.0
+                    test_correct_num = 0
+                    for i in tqdm(range(int(len(data) / self.batch_size))):
+                        step += 1
+                        total_v += self.batch_size
+                        train_batch = data[next_start_pos:next_start_pos+self.batch_size] 
+                        label_batch = label[next_start_pos:next_start_pos+self.batch_size] 
+                        next_start_pos += self.batch_size 
+                        assert len(train_batch)==self.batch_size
+                        
+                        val_feed = {self.inputs: train_batch, self.labels: label_batch}
+                        test_correct_num += sess.run(right_count, val_feed)
+                        print('test acc:', test_correct_num / total_v, 'test_correct_num:', test_correct_num,
+                              'total_v:', total_v)
+            
 
-    dense1 = tf.nn.relu(dense1, name='fc1') # Relu activation
-    dense1 = tf.nn.dropout(dense1, _dropout)
-
-    dense2 = tf.nn.relu(tf.matmul(dense1, _weights['wd2']) + _biases['bd2'], name='fc2') # Relu activation
-    dense2 = tf.nn.dropout(dense2, _dropout)
-
-    #어떤 종류의 클래스인지 예측
-    out = tf.matmul(dense2, _weights['out']) + _biases['out']
-
-    return out
+c3dnet = Model()
+c3dnet.test('path', X_train, y_train)
