@@ -26,8 +26,8 @@ def VidToFrame(load_path):
 
             mask = cv2.inRange(hsv, lower_skin, upper_skin)
             
-            width = 1920
-            height = 1080
+            width = 64
+            height = 36
             
             mask = cv2.resize(mask, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
