@@ -24,15 +24,15 @@ def VidToFrame(load_path):
             lower_skin = np.array([0, 133, 77])
             upper_skin = np.array([255, 173, 127])
 
-            mask = cv2.inRange(hsv, lower_skin, upper_skin)
+            skinMask = cv2.inRange(hsv, lower_skin, upper_skin)
             kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
             skinMask = cv2.erode(skinMask, kernel, iterations = 2)
             skinMask = cv2.dilate(skinMask, kernel, iterations = 2)
             skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
             skin = cv2.bitwise_and(image, image, mask = skinMask)
 
-            width = 64
-            height = 36
+            width = 128
+            height = 72
             
             mask = cv2.resize(skin, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
