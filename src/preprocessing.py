@@ -25,11 +25,16 @@ def VidToFrame(load_path):
             upper_skin = np.array([255, 173, 127])
 
             mask = cv2.inRange(hsv, lower_skin, upper_skin)
-            
+            kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (11, 11))
+            skinMask = cv2.erode(skinMask, kernel, iterations = 2)
+            skinMask = cv2.dilate(skinMask, kernel, iterations = 2)
+            skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
+            skin = cv2.bitwise_and(image, image, mask = skinMask)
+
             width = 64
             height = 36
             
-            mask = cv2.resize(mask, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
+            mask = cv2.resize(skin, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
             if cv2.waitKey(10) == 27:                     # exit if Escape is hit
                 break
