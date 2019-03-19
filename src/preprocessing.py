@@ -31,8 +31,8 @@ def VidToFrame(load_path):
             skinMask = cv2.GaussianBlur(skinMask, (3, 3), 0)
             skin = cv2.bitwise_and(image, image, mask = skinMask)
 
-            width = 640
-            height = 360
+            width = 112
+            height = 112
             
             mask = cv2.resize(skin, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
