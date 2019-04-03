@@ -12,11 +12,11 @@ def VidToFrame(load_path):
     #프레임 리스트 생성
     #start_frame = np.random.randint(0, total_frames-FRAME_NUM)
     frame_list = []
-    ran_num = random.randrange(0,total_frames+1)
+    ran_num = random.randrange(0,total_frames-1)
 
     for i in range(FRAME_NUM):
         while ran_num in frame_list:
-            ran_num = random.randrange(0,total_frames+1)
+            ran_num = random.randrange(0,total_frames-1)
         frame_list.append(ran_num)
     
     frame_list.sort()
@@ -52,8 +52,7 @@ def VidToFrame(load_path):
 
             if cv2.waitKey(10) == 27:                     # exit if Escape is hit
                 break
-            if frame_cnt > FRAME_NUM:
-                break
+
             if frame_list[frame_cnt] == cnt:
                 frames.append(mask)
                 frame_cnt += 1
@@ -91,7 +90,7 @@ def getDataFrame(load_path):
             # load_data
             for f in filename:
                 data.append(VidToFrame(parent+'\\'+f))
-                
+
     data = np.asarray(data)
     labels = np.asarray(labels,dtype=np.int)
 
