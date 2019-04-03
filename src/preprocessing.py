@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import os
 import random
-import matplotlib.pyplot as plt
 
 def VidToFrame(load_path):
     frames = list()
@@ -64,7 +63,7 @@ def VidToFrame(load_path):
     except Exception:
         pass
     frames = np.asarray(frames)
-    print(frame_list)
+
     return frames
 
 def FrameCount(load_path):
