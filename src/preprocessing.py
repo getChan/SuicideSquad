@@ -1,13 +1,26 @@
 import cv2
 import numpy as np
 import os
+import random
+import matplotlib.pyplot as plt
 
 def VidToFrame(load_path):
     frames = list()
     total_frames = FrameCount(load_path)
     # 사용할 프레임 수
     FRAME_NUM = 30
-    start_frame = np.random.randint(0, total_frames-FRAME_NUM)
+    
+    #프레임 리스트 생성
+    #start_frame = np.random.randint(0, total_frames-FRAME_NUM)
+    frame_list = []
+    ran_num = random.randrange(0,total_frames+1)
+
+    for i in range(FRAME_NUM):
+        while ran_num in frame_list:
+            ran_num = random.randrange(0,total_frames+1)
+        frame_list.append(ran_num)
+    
+    frame_list.sort()
 
     try:
         vidcap = cv2.VideoCapture(load_path)
@@ -16,6 +29,7 @@ def VidToFrame(load_path):
         if not success :
             print('Video Read Error')
         cnt = 0 
+        frame_cnt = 0
         while success:
             
             success, image = vidcap.read()
@@ -39,14 +53,18 @@ def VidToFrame(load_path):
 
             if cv2.waitKey(10) == 27:                     # exit if Escape is hit
                 break
-            if cnt >= start_frame and cnt < start_frame+FRAME_NUM:
+            if frame_cnt > FRAME_NUM:
+                break
+            if frame_list[frame_cnt] == cnt:
                 frames.append(mask)
+                frame_cnt += 1
             cnt += 1
 
         vidcap.release()
     except Exception:
         pass
     frames = np.asarray(frames)
+    print(frame_list)
     return frames
 
 def FrameCount(load_path):
