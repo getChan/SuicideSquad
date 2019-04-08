@@ -1,30 +1,52 @@
 import boto3
+import urllib.request
+import json
+import re
 
 class rekognition(object):
-    # def __init__(self):
+    def __init__(self):
+        ## 사물인식 후보
+        self.objects = []
+        self.words = []
         
-    def getObjects(self):
+    def getObjects(self, filename):
         ## 이미지 파일 load
-        file = '../data/photo.jpg'
+        filename = filename
         ## api객체생성
         client = boto3.client('rekognition')
 
-        with open(file, 'rb') as photo:
+        with open(filename, 'rb') as photo:
             response = client.detect_labels(Image={'Bytes': photo.read()})
-        ## 사물인식 후보
         
-        objects = []
         ## 상위 후보부터 append
         for i in response['Labels']:
-            objects.append(i['Name'])
-        ### 상위 범주
-            # for x in response['Labels'][0]['Parents']:
-            #     objects.append(x['Name']) 
+            self.objects.append(i['Name'])
 
-        print(objects)
-
-    # def get(self, parameter_list):
-    #     pass
+    def translate(self):
+        # 네이버 기계번역 API
+        client_id = "NXQWw2ISBXysLVAJCAoA"
+        client_secret = "rA04JXOQqO"
+        for obj in self.objects:
+            engword = urllib.parse.quote(obj)
+            data = "source=en&target=ko&text=" + engword
+            url = "https://openapi.naver.com/v1/language/translate"
+            request = urllib.request.Request(url)
+            request.add_header("X-Naver-Client-Id",client_id)
+            request.add_header("X-Naver-Client-Secret",client_secret)
+            response = urllib.request.urlopen(request, data=data.encode("utf-8"))
+            rescode = response.getcode()
+            if(rescode==200):
+                response_body = response.read()
+                translated = json.loads(response_body.decode('utf-8'))['message']['result']['translatedText']
+                ## 특수문자 제거
+                symbols = '[.]'
+                translated = re.sub(symbols, '', translated)
+                self.words.append(translated)
+            else:
+                print("Error Code:" + rescode)
 
 if __name__ == "__main__":
-    rekognition().getObjects()
+    test = rekognition()
+    test.getObjects('../data/ex.jpg')
+    test.translate()
+    print(test.words)
