@@ -53,10 +53,10 @@ class rekognition(object):
         db = conn.get_database('suicide')
         collection = db.get_collection('dictionary')
         for word in self.words:
-            query = collection.find_one({'word':{word}})
+            query = collection.find_one({'word':{"$regex":word}})
             if query != None:
                 self.results.append(query['id'])
-                break
+#                break
 
 if __name__ == "__main__":
     test = rekognition()
