@@ -2,12 +2,14 @@ import boto3
 import urllib.request
 import json
 import re
+import pymongo
 
 class rekognition(object):
     def __init__(self):
         ## 사물인식 후보
         self.objects = []
         self.words = []
+        self.results = []
         
     def getObjects(self, filename):
         ## 이미지 파일 load
@@ -45,8 +47,21 @@ class rekognition(object):
             else:
                 print("Error Code:" + rescode)
 
+    def dbQuery(self):
+        ## MongoDB query
+        conn = pymongo.MongoClient('127.0.0.1', 27017)
+        db = conn.get_database('suicide')
+        collection = db.get_collection('dictionary')
+        for word in self.words:
+            query = collection.find_one({'word':{word}})
+            if query != None:
+                self.results.append(query['id'])
+                break
+
 if __name__ == "__main__":
     test = rekognition()
     test.getObjects('../data/ex.jpg')
     test.translate()
     print(test.words)
+    test.dbQuery()
+    print(test.results)
