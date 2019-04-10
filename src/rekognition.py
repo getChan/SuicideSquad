@@ -9,7 +9,7 @@ class rekognition(object):
         ## 사물인식 후보
         self.objects = []
         self.words = []
-        self.results = []
+        self.results = ''
         
     def getObjects(self, filename):
         ## 이미지 파일 load
@@ -55,8 +55,7 @@ class rekognition(object):
         for word in self.words:
             query = collection.find_one({'word':{"$regex":word}})
             if query != None:
-                self.results.append(query['id'])
-#                break
+                self.results= query['id']
 
 if __name__ == "__main__":
     test = rekognition()

@@ -15,3 +15,4 @@ public class NotificationsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_notifications,container,false);
     }
 }
+
