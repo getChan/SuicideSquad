@@ -1,13 +1,19 @@
 package com.example.skarn.vision;
 
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -338,11 +344,11 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
             matrix.postRotate(orientation);
             bitmap =  Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
 
-            //bitmap을 byte array로 변환
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-            byte[] currentData = stream.toByteArray();
-            doFileUpload(currentData);
+//            //bitmap을 byte array로 변환
+//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//            byte[] currentData = stream.toByteArray();
+            postData(bitmap);
 
             //파일로 저장
 //            new SaveImageTask().execute(currentData);
@@ -350,55 +356,53 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
         }
     };
 
+    public static void postData(Bitmap imageToSend) {
+        try
+        {
+            URL url = new URL("http://54.180.116.99:3000/upload-image");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
 
-    public void doFileUpload(byte[] data) {
-        try {
-            URL url = new URL("http://54.180.116.99:3000/image_upload.jsp");
-            Log.i(TAG, "http://localhost/image_upload.jsp" );
-            String lineEnd = "\r\n";
-            String twoHyphens = "--";
-            String boundary = "*****";
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
 
-            // open connection
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setDoInput(true); //input 허용
-            con.setDoOutput(true);  // output 허용
-            con.setUseCaches(false);   // cache copy를 허용하지 않는다.
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Connection", "Keep-Alive");
-            con.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Cache-Control", "no-cache");
 
-            // write data
-            DataOutputStream dos =
-                    new DataOutputStream(con.getOutputStream());
-            Log.i(TAG, "Open OutputStream" );
-            dos.writeBytes(twoHyphens + boundary + lineEnd);
+            conn.setReadTimeout(35000);
+            conn.setConnectTimeout(35000);
 
+            // directly let .compress write binary image data
+            // to the output-stream
+            OutputStream os = conn.getOutputStream();
+            imageToSend.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            os.flush();
+            os.close();
 
+            System.out.println("Response Code: " + conn.getResponseCode());
 
-            // 파일 전송시 파라메터명은 file1 파일명은 camera.jpg로 설정하여 전송
-            dos.writeBytes("Content-Disposition: form-data; name=\"file1\";filename=\"camera.jpg\"" +
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            Log.d("sdfs", "sfsd");
+            BufferedReader responseStreamReader = new BufferedReader(new InputStreamReader(in));
+            String line = "";
+            StringBuilder stringBuilder = new StringBuilder();
+            while ((line = responseStreamReader.readLine()) != null)
+                stringBuilder.append(line).append("\n");
+            responseStreamReader.close();
 
-                    lineEnd);
+            String response = stringBuilder.toString();
+            System.out.println(response);
 
-
-            dos.writeBytes(lineEnd);
-            dos.write(data,0,data.length);
-            Log.i(TAG, data.length+"bytes written" );
-            dos.writeBytes(lineEnd);
-            dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
-            dos.flush(); // finish upload...
-
-            try { dos.close(); } catch(Exception e){}
-        } catch (Exception e) {
-            Log.i(TAG, "exception " + e.getMessage());
-            // TODO: handle exception
+            conn.disconnect();
         }
-        Log.i(TAG, data.length+"bytes written successed ... finish!!" );
-
-
-
+        catch(MalformedURLException e) {
+            e.printStackTrace();
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
     }
+
 //    private class SaveImageTask extends AsyncTask<byte[], Void, Void> {
 //
 //        @Override
