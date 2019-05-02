@@ -6,6 +6,7 @@ import preprocessing as pre
 import tensorflow.contrib.layers as layers
 import random
 import matplotlib.pyplot as plt
+import sys
 
 test_data, test_label = pre.getDataFrame('../validation/')
 
@@ -235,9 +236,12 @@ class Model(object):
             
                 val_feed = {self.inputs: test_data, self.labels:test_label}
                 
-                    
-                print('Accuracy:', sess.run(acc, val_feed))
+                acc = sess.run(acc, val_feed)
+                # print('Accuracy:', sess.run(acc, val_feed))
                 
+                return acc 
+
+
     def run(self, data, label):
         with self.graph.as_default():
             c3d_net = [
@@ -289,4 +293,6 @@ class Model(object):
 
 if __name__ == "__main__":
     c3dnet = Model()
-    c3dnet.test(test_data, test_label)
+    result = c3dnet.test(test_data, test_label)
+    print(result)
+    sys.exit(result)
