@@ -1,5 +1,6 @@
 package e.jin.last;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,37 +25,44 @@ public class StudyFragment extends Fragment {
                     ImageButton btn4 = (ImageButton) v.findViewById(R.id.button4);
                     ImageButton btn5 = (ImageButton) v.findViewById(R.id.button5);
 
-                    btn1.setOnClickListener(new View.OnClickListener() {
+                    btn1.setOnClickListener(new View.OnClickListener(){
                         @Override
-                        public void onClick(View view) {
-                            Log.w("first click","click!");
-                            getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+                        public void onClick(View view){
+                            Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                            startActivity(intent);
                         }
                     });
-                    btn2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
-                        }
-                    });
-        btn3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
-            }
-        });
-        btn4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
-            }
-        });
-        btn5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
-            }
-        });
+//                    btn1.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            Log.w("first click","click!");
+//                            getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+//                        }
+//                    });
+//                    btn2.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View view) {
+//                            getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+//                        }
+//                    });
+//        btn3.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+//            }
+//        });
+//        btn4.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+//            }
+//        });
+//        btn5.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new StudyMainFragment()).commit();
+//            }
+//        });
 
         return v;
     }

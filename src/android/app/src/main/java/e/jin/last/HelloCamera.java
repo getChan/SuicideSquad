@@ -144,11 +144,11 @@ public class HelloCamera extends Activity {
         super.onCreate(savedInstanceState, persistentState);
         setContentView(R.layout.fragment_notifications);
 
-        mImage = (ImageView)findViewById(R.id.image_view);
+//        mImage = (ImageView)findViewById(R.id.image_view);
 
-        surface = (SurfaceView)findViewById(R.id.surface_view);
+//        surface = (SurfaceView)findViewById(R.id.surface_view);
         SurfaceHolder holder = surface.getHolder();
-        view = (ImageView)findViewById(R.id.image_view);
+//        view = (ImageView)findViewById(R.id.image_view);
 
         //SurfaceView Listener를 등록
         holder.addCallback(mSurfaceListener);

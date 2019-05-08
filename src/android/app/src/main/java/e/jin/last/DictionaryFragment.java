@@ -29,7 +29,8 @@ import java.net.URL;
 
 public class DictionaryFragment extends Fragment {
     String[] dataid= new String[9];
-    String[] dataname = new String[9];
+//    String[] dataname = new String[9];
+    String[] dataname = {"asd"};
 
     public DictionaryFragment(){
 
@@ -40,13 +41,14 @@ public class DictionaryFragment extends Fragment {
         // 통신해서 수어 id랑 이름 불러오기
 
         if (isNetworkAvailable()){
-            String url = "http://10.92.159.82:3000/process/allword";
+            String url = "http://ec2-13-209-69-188.ap-northeast-2.compute.amazonaws.com:3000/process/allword";
             DownloadTask downloadTask = new DownloadTask();
             downloadTask.execute(url);
         }
         else{
             Toast.makeText(getContext(), "Network is not Available", Toast.LENGTH_SHORT).show();
         }
+
 
         String[] list_menu={"a","b","c"};
 
@@ -63,16 +65,16 @@ public class DictionaryFragment extends Fragment {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getContext(),"이벤트 발생", Toast.LENGTH_SHORT).show();
-                DictionaryFragment dictionaryFragment = new DictionaryFragment();
-                Bundle bundle = new Bundle(2);
+//                Toast.makeText(getContext(),"이벤트 발생", Toast.LENGTH_SHORT).show();
+                DictionaryResultFragment dictionaryResultFragment= new DictionaryResultFragment();
+                Bundle bundle = new Bundle(1);
 
-//                bundle.putString("dataid", dataid);
+                bundle.putString("dataid", "id");
 
-//                bundle.putString("dataname", dataname);
-                dictionaryFragment.setArguments(bundle);
+//                bundle.putString("dataname", "name");
+                dictionaryResultFragment.setArguments(bundle);
 
-                getFragmentManager().beginTransaction().replace(R.id.fragment_container, new DictionaryResultFragment()).commit();
+                getFragmentManager().beginTransaction().replace(R.id.dictionaryfrag, dictionaryResultFragment).commit();
 
             }
         });
@@ -80,6 +82,7 @@ public class DictionaryFragment extends Fragment {
         return layout;
 
     }
+
     private boolean isNetworkAvailable(){
         boolean available = false;
         ConnectivityManager connMgr = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -125,22 +128,26 @@ public class DictionaryFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String jsonString) {
-            try {
-//                JSONObject wrapObject = new JSONObject(jsonString);
-                JSONArray jsonArray = new JSONArray(jsonString);
 
-                for(int i=0; i<jsonArray.length(); i++){
-                    JSONObject dataJsonObject = jsonArray.getJSONObject(i);
+//            try {
+//                JSONObject jsonObject = new JSONObject(jsonString)
+//                JSONArray jsonArray = new JSONArray(jsonString);
+//                Toast.makeText(getContext(), jsonArray.toString(), Toast.LENGTH_SHORT).show();
+//
+//                for(int i=0; i<jsonArray.length(); i++){
+//                    JSONObject dataJsonObject = jsonArray.getJSONObject(i);
+//
+//                    dataid[i] = dataJsonObject.getString("id");
+//                    dataname[i] = dataJsonObject.getString("word");
+//
+//                }
+//
+//            } catch (JSONException e){
+//                e.printStackTrace();
+//            }
+            dataname[0] = jsonString;
 
-                    dataid[i] = dataJsonObject.getString("id");
-                    dataname[i] = dataJsonObject.getString("word");
-                }
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-
-
-            Toast.makeText(getContext(), "response sucsex", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "response sucsex", Toast.LENGTH_SHORT).show();
         }
     }
 
