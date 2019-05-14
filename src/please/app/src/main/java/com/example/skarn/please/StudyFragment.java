@@ -28,6 +28,43 @@ public class StudyFragment extends Fragment {
             @Override
             public void onClick(View view){
                 Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                intent.putExtra("label", "0");
+                startActivity(intent);
+            }
+        });
+
+        btn2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                intent.putExtra("label", "1");
+                startActivity(intent);
+            }
+        });
+
+        btn3.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                intent.putExtra("label", "2");
+                startActivity(intent);
+            }
+        });
+
+        btn4.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                intent.putExtra("label", "3");
+                startActivity(intent);
+            }
+        });
+
+        btn5.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                Intent intent = new Intent(getActivity(), StudyMainActivity.class);
+                intent.putExtra("label", "4");
                 startActivity(intent);
             }
         });

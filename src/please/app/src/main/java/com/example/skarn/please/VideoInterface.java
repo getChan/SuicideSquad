@@ -7,6 +7,6 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 public interface VideoInterface {
     @Multipart
-    @POST("/imagefolder/index.php")
+    @POST("process/video")
     Call<ResultObject> uploadVideoToServer(@Part MultipartBody.Part video);
 }

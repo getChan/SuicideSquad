@@ -2,6 +2,7 @@ package com.example.skarn.please;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -28,6 +30,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class StudyMainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
     private static final String TAG =  MainActivity.class.getSimpleName();
@@ -36,10 +40,14 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
     private Uri uri;
     private String pathToStoredVideo;
     private VideoView displayRecordedVideo;
-    private static final String SERVER_PATH = "";
+    private static final String SERVER_PATH = "http://117.16.244.58:3000/";
+    String label = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        label += intent.getStringExtra("label");
+        Toast.makeText(getBaseContext(), label, Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_main_study);
         displayRecordedVideo = (VideoView)findViewById(R.id.video_display);
         Button captureVideoButton = (Button)findViewById(R.id.capture_video);
@@ -94,6 +102,8 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
                 displayRecordedVideo.start();
 
                 pathToStoredVideo = getRealPathFromURIPath(uri, StudyMainActivity.this);
+//                pathToStoredVideo = "label.mp4"
+
                 Log.d(TAG, "Recorded Video Path " + pathToStoredVideo);
                 //Store the video to your server
                 uploadVideoToServer(pathToStoredVideo);
@@ -107,12 +117,16 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
     }
 
     private void uploadVideoToServer(String pathToVideoFile){
+        // progress bar thread
+//        ProgressDialog progressdialog = ProgressDialog.show(this, "로딩중", "Loading..", true, false);
+
         File videoFile = new File(pathToVideoFile);
         RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
-        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
+//        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
+        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", label+".mp4", videoBody);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SERVER_PATH)
-//                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
         VideoInterface vInterface = retrofit.create(VideoInterface.class);
         Call<ResultObject> serverCom = vInterface.uploadVideoToServer(vFile);
@@ -121,9 +135,11 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
             public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
                 ResultObject result = response.body();
                 if(!TextUtils.isEmpty(result.getSuccess())){
-                    Toast.makeText(StudyMainActivity.this, "Result " + result.getSuccess(), Toast.LENGTH_LONG).show();
+                    String ox = result.getSuccess();
+                    Toast.makeText(StudyMainActivity.this, "Result " + ox, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Result " + result.getSuccess());
                 }
+
             }
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {

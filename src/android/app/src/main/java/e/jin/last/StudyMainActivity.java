@@ -30,6 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 
@@ -40,7 +41,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
     private Uri uri;
     private String pathToStoredVideo;
     private VideoView displayRecordedVideo;
-    private static final String SERVER_PATH = "";
+    private static final String SERVER_PATH = "http://13.125.180.142:3000/process/video";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,7 +117,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SERVER_PATH)
-//                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
         VideoInterface vInterface = retrofit.create(VideoInterface.class);
         Call<ResultObject>  serverCom = vInterface.uploadVideoToServer(vFile);
