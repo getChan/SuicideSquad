@@ -123,7 +123,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         File videoFile = new File(pathToVideoFile);
         RequestBody videoBody = RequestBody.create(MediaType.parse("video/*"), videoFile);
 //        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
-        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", label+".mp4", videoBody);
+        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", label, videoBody);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SERVER_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -133,17 +133,23 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         serverCom.enqueue(new Callback<ResultObject>() {
             @Override
             public void onResponse(Call<ResultObject> call, Response<ResultObject> response) {
-                ResultObject result = response.body();
+                ResultObject result = (ResultObject)response.body();
                 if(!TextUtils.isEmpty(result.getSuccess())){
                     String ox = result.getSuccess();
                     Toast.makeText(StudyMainActivity.this, "Result " + ox, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Result " + result.getSuccess());
+                }
+                else{
+                    Toast.makeText(StudyMainActivity.this, "failure", Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "failure");
                 }
 
             }
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {
                 Log.d(TAG, "Error message " + t.getMessage());
+                Toast.makeText(StudyMainActivity.this, "X", Toast.LENGTH_LONG).show();
+                Log.d(TAG, t.toString());
             }
         });
     }
