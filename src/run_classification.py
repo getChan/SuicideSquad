@@ -1,5 +1,6 @@
 from model import Model
 from preprocessing import VidToFrame
+import numpy as np
 
 class run_classification(object):
     def __init__(self, file):
@@ -11,8 +12,9 @@ class run_classification(object):
 
 if __name__ == "__main__":
     ## 파일 불러와야함
-    input_data = run(path)
-    ## 레이블 불러와야댐 좆밥드랑
-    label = ㅇㅋ?
+    input_data = run_classification('../data')
+    input_data = input_data.FileToFrame()
+    
+    label = [1, 0, 0, 0, 0]
     c3dnet = Model()
     print(c3dnet.run(np.expand_dims(input_data, axis=0), np.expand_dims(label, axis=0)))
