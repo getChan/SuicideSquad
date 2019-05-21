@@ -262,6 +262,7 @@ class Model(object):
                 int_label=tf.cast(int_label,dtype=tf.int64)
 
                 result = tf.equal(tf.argmax(logits, axis=1), tf.argmax(int_label, axis=1))
+                softmax_logits = tf.nn.softmax(logits)
 
                 init = tf.global_variables_initializer()
 
@@ -276,4 +277,4 @@ class Model(object):
                 val_feed = {self.inputs: run_data, self.labels:run_label}
 
 
-                return sess.run(result, val_feed)
+                return sess.run([result, softmax_logits], val_feed)
