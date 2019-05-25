@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +20,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.google.gson.JsonArray;
+
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -39,7 +43,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
     private static final int READ_REQUEST_CODE = 200;
     private Uri uri;
     private String pathToStoredVideo;
-    private VideoView displayRecordedVideo;
+//    private VideoView displayRecordedVideo;
     private static final String SERVER_PATH = "http://117.16.244.58:3000/";
     String label = "";
     @Override
@@ -49,7 +53,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         label += intent.getStringExtra("label");
         Toast.makeText(getBaseContext(), label, Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_main_study);
-        displayRecordedVideo = (VideoView)findViewById(R.id.video_display);
+//        displayRecordedVideo = (VideoView)findViewById(R.id.video_display);
         Button captureVideoButton = (Button)findViewById(R.id.capture_video);
         captureVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,9 +70,9 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_VIDEO_CAPTURE){
             uri = data.getData();
             if(EasyPermissions.hasPermissions(StudyMainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)){
-                displayRecordedVideo.setVideoURI(uri);
-                displayRecordedVideo.start();
-
+//                displayRecordedVideo.setVideoURI(uri);
+//                displayRecordedVideo.start();
+                Log.d(TAG, "URI : "+uri);
                 pathToStoredVideo = getRealPathFromURIPath(uri, StudyMainActivity.this);
                 Log.d(TAG, "Recorded Video Path " + pathToStoredVideo);
                 //Store the video to your server
@@ -98,8 +102,8 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
     public void onPermissionsGranted(int requestCode, List<String> perms) {
         if(uri != null){
             if(EasyPermissions.hasPermissions(StudyMainActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)){
-                displayRecordedVideo.setVideoURI(uri);
-                displayRecordedVideo.start();
+//                displayRecordedVideo.setVideoURI(uri);
+//                displayRecordedVideo.start();
 
                 pathToStoredVideo = getRealPathFromURIPath(uri, StudyMainActivity.this);
 //                pathToStoredVideo = "label.mp4"
@@ -136,8 +140,18 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
                 ResultObject result = (ResultObject)response.body();
                 if(!TextUtils.isEmpty(result.getSuccess())){
                     String ox = result.getSuccess();
-                    Toast.makeText(StudyMainActivity.this, "Result " + ox, Toast.LENGTH_LONG).show();
+//                    Toast.makeText(StudyMainActivity.this, "OX " + ox, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Result " + result.getSuccess());
+
+                    ArrayList<String> prob = result.getProb();
+                    for(int i=0; i<5; i++){
+//                        Float.parseFloat(prob.get(i));
+                        Log.d(TAG, "Result " + Float.parseFloat(prob.get(i)));
+                    }
+                    // TODO : 받아온 OX, 확률값 레이아웃 띄우기
+
+                    Toast.makeText(StudyMainActivity.this, "prob " + prob.toString(), Toast.LENGTH_LONG).show();
+
                 }
                 else{
                     Toast.makeText(StudyMainActivity.this, "failure", Toast.LENGTH_LONG).show();
@@ -148,7 +162,7 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
             @Override
             public void onFailure(Call<ResultObject> call, Throwable t) {
                 Log.d(TAG, "Error message " + t.getMessage());
-                Toast.makeText(StudyMainActivity.this, "X", Toast.LENGTH_LONG).show();
+                Toast.makeText(StudyMainActivity.this, "ERROR", Toast.LENGTH_LONG).show();
                 Log.d(TAG, t.toString());
             }
         });
