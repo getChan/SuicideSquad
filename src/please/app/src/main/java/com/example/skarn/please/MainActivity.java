@@ -26,8 +26,6 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
-    String[] dataid= new String[10];
-    String[] dataname = new String[10];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +48,6 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case R.id.navigation_dictionary:
                             selectedFragment=new DictionaryFragment();
-                            Bundle bundle = new Bundle(1);
-                            bundle.putStringArray("dataname", dataname);
-                            selectedFragment.setArguments(bundle);
                             break;
                         case R.id.navigation_vision:
                             Intent intent = new Intent(MainActivity.this, VisionActivity.class);

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#ffc5c5"
+    >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/mainstudy"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/video1"
+        android:background="#ffc5c5"
+        android:padding="0dp">
+
+        <VideoView
+            android:id="@+id/video1"
+            android:layout_width="wrap_content"
+            android:layout_height="280dp"
+
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1수화단어"/>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1수화내용" />
+
+        <ImageButton
+            android:id="@+id/oxBtn1"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:srcCompat="@android:drawable/ic_media_play" />
+    </LinearLayout>
+</LinearLayout>

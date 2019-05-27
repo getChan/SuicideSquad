@@ -19,7 +19,7 @@ public class DictionaryResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         FrameLayout layout=(FrameLayout) inflater.inflate(R.layout.fragment_dictionary_result,container,false);
-        String args = getArguments().getString("dataid");
+        String args = getArguments().getString("id");
 
         Toast.makeText(getContext(),args, Toast.LENGTH_SHORT).show();
 
@@ -27,7 +27,7 @@ public class DictionaryResultFragment extends Fragment {
 
         WebSettings mWebVIewSettings = mWebVIew.getSettings();
         mWebVIewSettings.setJavaScriptEnabled(true);
-        mWebVIew.loadUrl("http://sldict.korean.go.kr/front/sign/signContentsView.do?current_pos_index=0&origin_no=1");
+        mWebVIew.loadUrl("http://sldict.korean.go.kr/front/sign/signContentsView.do?current_pos_index=0&origin_no="+args);
         return layout;
     }
 }

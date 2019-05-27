@@ -100,11 +100,11 @@ public class VisionActivity extends AppCompatActivity implements EasyPermissions
 
             if (EasyPermissions.hasPermissions(VisionActivity.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 displayImage.setImageURI(photoUri);
-                Log.d(TAG, "DEBUGZZ"+photoUri);
+                Log.d(TAG, "DEBUGZZ"+imageFilePath);
 //                pathToStoredImage = getRealPathFromURIPath(photoUri, VisionActivity.this);
 //                Log.d(TAG, "Recorded Image Path " + pathToStoredImage);
                 //Store the video to your server
-                uploadImageToServer(photoUri.toString());
+                uploadImageToServer(imageFilePath.toString());
 
             } else {
                 EasyPermissions.requestPermissions(VisionActivity.this, getString(R.string.read_file), READ_REQUEST_CODE, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -158,7 +158,7 @@ public class VisionActivity extends AppCompatActivity implements EasyPermissions
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
 //        MultipartBody.Part vFile = MultipartBody.Part.createFormData("video", videoFile.getName(), videoBody);
         //TODO : 이미지 이름 설정
-        MultipartBody.Part vFile = MultipartBody.Part.createFormData("image", label, imageBody);
+        MultipartBody.Part vFile = MultipartBody.Part.createFormData("photo", "ex.jpg", imageBody);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(SERVER_PATH)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -176,7 +176,7 @@ public class VisionActivity extends AppCompatActivity implements EasyPermissions
 
                     DictionaryResultFragment dictionaryResultFragment= new DictionaryResultFragment();
                     Bundle bundle = new Bundle(1);
-                    bundle.putString("dataid", visionId);
+                    bundle.putString("id", visionId);
                     dictionaryResultFragment.setArguments(bundle);
                     getSupportFragmentManager().beginTransaction().replace(R.id.dictionaryfrag, dictionaryResultFragment).commit();
 

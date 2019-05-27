@@ -15,7 +15,10 @@ import android.text.TextUtils;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -53,7 +56,6 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         label += intent.getStringExtra("label");
         Toast.makeText(getBaseContext(), label, Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_main_study);
-//        displayRecordedVideo = (VideoView)findViewById(R.id.video_display);
         Button captureVideoButton = (Button)findViewById(R.id.capture_video);
         captureVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,6 +67,36 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
             }
         });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        VideoView videoView = findViewById(R.id.video);
+        Uri videouri;
+        if(label.equals("0")){
+            //귀엽다
+            videouri = Uri.parse("http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20160102/239131/MOV000248760_700X466.mp4");
+            videoView.setVideoURI(videouri);
+        }else if(label.equals("1")){
+            //안녕
+            videouri = Uri.parse("http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20151223/233171/MOV000244910_700X466.mp4");
+            videoView.setVideoURI(videouri);
+        }else if(label.equals("2")){
+            //사랑
+            videouri = Uri.parse("http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20160106/241738/MOV000253928_700X466.mp4");
+            videoView.setVideoURI(videouri);
+        }else if(label.equals("3")){
+            //감사
+            videouri = Uri.parse("http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20160102/238965/MOV000248428_700X466.mp4");
+            videoView.setVideoURI(videouri);
+        }else {
+            //기다리다
+            videouri = Uri.parse("http://sldict.korean.go.kr/multimedia/multimedia_files/convert/20160103/239573/MOV000249602_700X466.mp4");
+            videoView.setVideoURI(videouri);
+        }
+        videoView.start();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_VIDEO_CAPTURE){
@@ -140,17 +172,37 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
                 ResultObject result = (ResultObject)response.body();
                 if(!TextUtils.isEmpty(result.getSuccess())){
                     String ox = result.getSuccess();
-//                    Toast.makeText(StudyMainActivity.this, "OX " + ox, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Result " + result.getSuccess());
 
-                    ArrayList<String> prob = result.getProb();
-                    for(int i=0; i<5; i++){
-//                        Float.parseFloat(prob.get(i));
-                        Log.d(TAG, "Result " + Float.parseFloat(prob.get(i)));
-                    }
                     // TODO : 받아온 OX, 확률값 레이아웃 띄우기
+                    ImageView imageox = findViewById(R.id.oxview);
+                    if(ox.equals("True")){
+                        imageox.setImageResource(R.drawable.o);
+                    }
+                    else{
+                        imageox.setImageResource(R.drawable.x);
+                    }
+                    // problabel
+                    ListView problabelview = findViewById(R.id.problabel);
+                    String[] problabel = {"귀엽다", "안녕하세요","사랑", "감사", "기다리다"};
+                    ArrayAdapter<String> problabeladapter = new ArrayAdapter<String >(
+                            getBaseContext(), android.R.layout.simple_list_item_1, problabel
+                    );
+                    problabelview.setAdapter(problabeladapter);
 
-                    Toast.makeText(StudyMainActivity.this, "prob " + prob.toString(), Toast.LENGTH_LONG).show();
+
+                    // prob 띄우기
+                    ListView problist = findViewById(R.id.problist);
+                    ArrayList<String> prob = result.getProb();
+
+//                    for(int i=0; i<5; i++){
+//                        Float.parseFloat(prob.get(i));
+//                        Log.d(TAG, "Result " + Float.parseFloat(prob.get(i)));
+//                    }
+                    ArrayAdapter<String> probadapter = new ArrayAdapter<String>(
+                            getBaseContext(), android.R.layout.simple_list_item_1, prob
+                    );
+                    problist.setAdapter(probadapter);
 
                 }
                 else{

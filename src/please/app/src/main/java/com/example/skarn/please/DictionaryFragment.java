@@ -1,9 +1,5 @@
 package com.example.skarn.please;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,139 +11,148 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.android.volley.VolleyLog.TAG;
 
 public class DictionaryFragment extends Fragment {
 
-    public String url = "http://117.16.244.58:3000/process/word";
+    private String url = "http://117.16.244.58:3000/process/word";
+
+    private ArrayList<String> list_menu_id = new ArrayList<String>();
+    private ArrayList<String> list_menu_name = new ArrayList<String>();
+
+    private ListView listview;
+    private ArrayAdapter<String> listViewAdapter;
+    private SearchView searchView;
+
     public DictionaryFragment(){
 
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isNetworkAvailable()){
-
-            DictionaryFragment.DownloadTask downloadTask = new DictionaryFragment.DownloadTask();
-            downloadTask.execute(url);
-        }
-        else{
-            Toast.makeText(getContext(), "Network is not Available", Toast.LENGTH_SHORT).show();
-        }
-
     }
 // TODO : search 버튼 누르면 서버로 request 후 response 받은 json 파싱 후 listview로 띄움
 // TODO : listview 누르면 해당 id값 bundle로 넘겨주어 해당하는 수화 영상 띄운다.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // 레이아웃 초기화
         RelativeLayout layout=(RelativeLayout) inflater.inflate(R.layout.fragment_dictionary,container,false);
-        // 통신해서 수어 id랑 이름 불러오기
 
-        String[] list_menu={"a","b","c"};
-        ListView listview=(ListView)layout.findViewById(R.id.list_menu);
-
-        ArrayAdapter<String> listViewAdapter = new ArrayAdapter<String>(
-                getActivity(), android.R.layout.simple_list_item_1,list_menu
+        listview=(ListView)layout.findViewById(R.id.list_menu);
+        listViewAdapter = new ArrayAdapter<String>(
+                getActivity(), android.R.layout.simple_list_item_1,list_menu_name
         );
         listview.setAdapter(listViewAdapter);
+
+        searchView = layout.findViewById(R.id.search_dic);
+
+        return layout;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            // search 리스너
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+//                Log.d(TAG, "QUERY [{\"wordName\":\""+query+"\"}]");
+
+                // on submit
+                JSONArray requestjsonArray = new JSONArray();
+                RequestQueue queue = Volley.newRequestQueue(getContext());
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("wordName", query);
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+                requestjsonArray.put(jsonObject);
+
+                Log.d(TAG, "JSON"+requestjsonArray.toString());
+                JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.POST, url, requestjsonArray, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        // arraylist 초기화
+                        list_menu_id.clear();
+                        list_menu_name.clear();
+                        // json parse
+                        for(int i=0; i<response.length(); i++){
+                            try {
+                                JSONObject jsonObject = response.getJSONObject(i);
+                                // response to arraylist
+                                list_menu_id.add(jsonObject.getString("id"));
+                                list_menu_name.add(jsonObject.getString("word"));
+                            } catch (JSONException e){
+                                Log.e(TAG, e.getMessage());
+                            }
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e(TAG, error.getMessage());
+                    }
+                }){
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        final Map<String, String> headers = new HashMap<>();
+                        headers.put("Content-Type", "application/json");
+
+                        return super.getHeaders();
+                    }
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/json; charset=utf-8";
+                    }
+                };
+                // resuest
+                queue.add(jsonArrayRequest);
+
+                // refresh listview
+                listViewAdapter.notifyDataSetChanged();
+                listview.setAdapter(listViewAdapter);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+
+        });
+
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 DictionaryResultFragment dictionaryResultFragment= new DictionaryResultFragment();
                 Bundle bundle = new Bundle(1);
-                bundle.putString("dataid", "id");
+                bundle.putString("id", list_menu_id.get(position));
                 dictionaryResultFragment.setArguments(bundle);
 
                 getFragmentManager().beginTransaction().replace(R.id.dictionaryfrag, dictionaryResultFragment).commit();
 
             }
         });
-        return layout;
     }
-
-    private boolean isNetworkAvailable(){
-        boolean available = false;
-        ConnectivityManager connMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isAvailable())
-            available = true;
-        return available;
-    }
-
-
-    private String downloadUrl(String strUrl) throws IOException {
-        String str;
-        String receiveMsg=null;
-
-        try {
-            URL url = new URL(strUrl);
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.connect();
-
-            InputStreamReader tmp = new InputStreamReader(urlConnection.getInputStream(), "UTF-8");
-            BufferedReader reader = new BufferedReader(tmp);
-            StringBuffer buffer = new StringBuffer();
-            while ((str = reader.readLine()) != null){
-                buffer.append(str);
-            }
-            receiveMsg = buffer.toString();
-            Log.i("receiveMsg", receiveMsg);
-            reader.close();
-
-        }catch (Exception e){
-            Log.d("Exception download url", e.toString());
-        }finally {
-
-        }
-        return receiveMsg;
-    }
-
-    private class DownloadTask extends AsyncTask<String, Integer, String> {
-        String s = null;
-
-        @Override
-        protected String doInBackground(String... url) {
-            try {
-                s = downloadUrl(url[0]);
-            } catch (Exception e){
-                Log.d("Background Task", e.toString());
-            }
-            return s;
-        }
-
-        @Override
-        protected void onPostExecute(String jsonString) {
-
-            String test = "";
-            try {
-//                JSONObject jsonObject = new JSONObject(jsonString);
-                JSONArray jsonArray = new JSONArray(jsonString);
-
-                for(int i=0; i<jsonArray.length(); i++){
-                    JSONObject dataJsonObject = jsonArray.getJSONObject(i);
-
-//                    test += dataJsonObject.getString("id");
-                    dataname[i] = dataJsonObject.getString("word");
-                }
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-
-            Toast.makeText(getContext(), test, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-
 }

@@ -8,6 +8,6 @@ import retrofit2.http.Part;
 
 public interface ImageInterface {
     @Multipart
-    @POST("process/image")
+    @POST("process/vision")
     Call<ResultObject> uploadImageToServer(@Part MultipartBody.Part image);
 }
