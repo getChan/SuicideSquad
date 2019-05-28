@@ -7,13 +7,20 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
         android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="학습할 항목을 선택하세요"
+            android:textSize="20dp"/>
         <ImageButton
             android:id="@+id/button1"
             android:layout_width="56dp"
             android:layout_height="56dp"
-
-            android:src="@drawable/maternity"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/cuty"
             android:scaleType="centerCrop"
             android:padding="0sp"
             android:background="@android:color/transparent"/>
@@ -21,8 +28,9 @@
             android:id="@+id/button2"
             android:layout_width="56dp"
             android:layout_height="56dp"
-
-            android:src="@drawable/maternity"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="50dp"
+            android:src="@drawable/hello"
             android:scaleType="centerCrop"
             android:padding="0sp"
             android:background="@android:color/transparent"/>
@@ -30,8 +38,9 @@
             android:id="@+id/button3"
             android:layout_width="56dp"
             android:layout_height="56dp"
-
-            android:src="@drawable/maternity"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="100dp"
+            android:src="@drawable/love"
             android:scaleType="centerCrop"
             android:padding="0sp"
             android:background="@android:color/transparent"/>
@@ -39,8 +48,9 @@
             android:id="@+id/button4"
             android:layout_width="56dp"
             android:layout_height="56dp"
-
-            android:src="@drawable/maternity"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="150dp"
+            android:src="@drawable/thanks"
             android:scaleType="centerCrop"
             android:padding="0sp"
             android:background="@android:color/transparent"/>
@@ -49,11 +59,12 @@
             android:id="@+id/button5"
             android:layout_width="56dp"
             android:layout_height="56dp"
-
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="200dp"
             android:background="@android:color/transparent"
             android:padding="0sp"
             android:scaleType="centerCrop"
-            android:src="@drawable/maternity" />
+            android:src="@drawable/wait" />
 
     </LinearLayout>
 

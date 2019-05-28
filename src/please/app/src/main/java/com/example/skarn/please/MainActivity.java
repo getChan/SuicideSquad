@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         BottomNavigationView bottomNav=findViewById(R.id.navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new StudyFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new HomeFragment()).commit();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
@@ -43,6 +43,9 @@ public class MainActivity extends AppCompatActivity {
                     Fragment selectedFragment = null; //처음에 선택된 액티비티 x
 
                     switch(item.getItemId()){
+                        case R.id.navigation_home:
+                            selectedFragment=new HomeFragment();
+                            break;
                         case R.id.navigation_study:
                             selectedFragment=new StudyFragment();
                             break;
@@ -54,8 +57,6 @@ public class MainActivity extends AppCompatActivity {
                             startActivity(intent);
                             selectedFragment=new StudyFragment();
                             break;
-//                        case R.id.navigation_notifications:
-//                            selectedFragment=new NotificationsFragment();
                     }
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
                     return true;

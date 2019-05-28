@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -54,9 +55,9 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         label += intent.getStringExtra("label");
-        Toast.makeText(getBaseContext(), label, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getBaseContext(), label, Toast.LENGTH_SHORT).show();
         setContentView(R.layout.activity_main_study);
-        Button captureVideoButton = (Button)findViewById(R.id.capture_video);
+        Button captureVideoButton = findViewById(R.id.capture_video);
         captureVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,6 +67,13 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
                 }
             }
         });
+        // problabel
+        ListView problabelview = findViewById(R.id.problabel);
+        String[] problabel = {"귀엽다", "안녕하세요","사랑", "감사", "기다리다"};
+        ArrayAdapter<String> problabeladapter = new ArrayAdapter<String >(
+                getBaseContext(), android.R.layout.simple_list_item_1, problabel
+        );
+        problabelview.setAdapter(problabeladapter);
     }
 
     @Override
@@ -182,14 +190,6 @@ public class StudyMainActivity extends AppCompatActivity implements EasyPermissi
                     else{
                         imageox.setImageResource(R.drawable.x);
                     }
-                    // problabel
-                    ListView problabelview = findViewById(R.id.problabel);
-                    String[] problabel = {"귀엽다", "안녕하세요","사랑", "감사", "기다리다"};
-                    ArrayAdapter<String> problabeladapter = new ArrayAdapter<String >(
-                            getBaseContext(), android.R.layout.simple_list_item_1, problabel
-                    );
-                    problabelview.setAdapter(problabeladapter);
-
 
                     // prob 띄우기
                     ListView problist = findViewById(R.id.problist);
