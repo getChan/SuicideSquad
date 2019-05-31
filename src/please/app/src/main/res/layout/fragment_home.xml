@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/back"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,4 +14,22 @@
         app:srcCompat="@drawable/logo"
         tools:layout_editor_absoluteX="175dp"
         tools:layout_editor_absoluteY="266dp" />
+
+
+    <ImageView
+        android:id="@+id/mainimage"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ok" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+
+        android:layout_marginTop="450dp"
+        android:text="긴팔을 이용해주세요"
+        android:textSize="20dp" />
 </RelativeLayout>

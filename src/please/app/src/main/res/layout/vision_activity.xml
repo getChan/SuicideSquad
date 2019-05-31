@@ -5,11 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/dictionaryfrag"
-    android:background="#ffc5c5"
+    android:background="@drawable/back"
     >
     <Button
         android:id="@+id/capture_image"
-        android:drawableTop="@drawable/videoupload"
+        android:drawableTop="@drawable/photoupload"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"

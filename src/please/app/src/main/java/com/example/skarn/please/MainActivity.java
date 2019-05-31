@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.navigation_vision:
                             Intent intent = new Intent(MainActivity.this, VisionActivity.class);
                             startActivity(intent);
-                            selectedFragment=new StudyFragment();
+                            selectedFragment=new HomeFragment();
                             break;
                     }
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
