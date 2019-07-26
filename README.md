@@ -11,5 +11,5 @@ Capstone design project
 
 ### 안드로이드 맵 메인화면
 
-![android](E:\SuicideSquad\app.jpg)
+![android](/app.jpg)
 
