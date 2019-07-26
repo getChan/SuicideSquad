@@ -5,3 +5,5 @@ src/.ipynb_checkpoints
 src/__pycache__
 src/.vscode
 model/
+server/parsing/img
+server/public/img
