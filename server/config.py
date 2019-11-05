@@ -19,7 +19,7 @@ if __name__ == "__main__":
     video = path + '/'+ label[0]
     input_data = run_classification(video)
 
-    ## 레이블 불러와야댐 좆밥드랑
+    ## 레이블 불러
     if label[0] == '0':
         label = [1,0,0,0,0]
     elif label[0] == '1':
